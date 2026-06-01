@@ -7,8 +7,8 @@ import { StatCard, PageHeader, SevBadge, StatusBadge, Spinner } from '../compone
 import toast from 'react-hot-toast'
 
 const SEV_COLORS = { CRITICAL: '#ef4444', HIGH: '#f97316', MEDIUM: '#eab308', LOW: '#10b981' }
-const STAT_COLORS = { OPEN: '#f97316', IN_REVIEW: '#3b82f6', RESOLVED: '#10b981', ESCALATED: '#ef4444', CLOSED: '#7a8fa8' }
-const TIP = { contentStyle: { background: '#161c26', border: '1px solid #1e2736', borderRadius: 8, color: '#e2eaf5', fontSize: 12 } }
+const STAT_COLORS = { OPEN: '#f97316', IN_REVIEW: '#3b82f6', RESOLVED: '#10b981', ESCALATED: '#ef4444', CLOSED: '#64748b' }
+const TIP = { contentStyle: { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, color: '#0f172a', fontSize: 12 } }
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -51,14 +51,14 @@ export default function Dashboard() {
             <AreaChart data={data.trend_data}>
               <defs>
                 <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="date" tick={{ fill: '#7a8fa8', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#7a8fa8', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip {...TIP} />
-              <Area type="monotone" dataKey="count" stroke="#f59e0b" fill="url(#tg)" strokeWidth={2} dot={false} />
+              <Area type="monotone" dataKey="count" stroke="#2563eb" fill="url(#tg)" strokeWidth={2} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -69,7 +69,7 @@ export default function Dashboard() {
           <ResponsiveContainer width="100%" height={160}>
             <PieChart>
               <Pie data={sevPie} dataKey="value" cx="50%" cy="50%" outerRadius={65} innerRadius={35}>
-                {sevPie.map(e => <Cell key={e.name} fill={SEV_COLORS[e.name] || '#7a8fa8'} />)}
+                {sevPie.map(e => <Cell key={e.name} fill={SEV_COLORS[e.name] || '#64748b'} />)}
               </Pie>
               <Tooltip {...TIP} />
             </PieChart>
@@ -78,7 +78,7 @@ export default function Dashboard() {
             {sevPie.map(e => (
               <div key={e.name} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{ background: SEV_COLORS[e.name] || '#7a8fa8' }} />
+                  <div className="w-2 h-2 rounded-full" style={{ background: SEV_COLORS[e.name] || '#64748b' }} />
                   <span className="text-ink-muted">{e.name}</span>
                 </div>
                 <span className="font-mono font-semibold text-ink">{e.value}</span>
@@ -95,11 +95,11 @@ export default function Dashboard() {
           <p className="text-sm font-semibold text-ink mb-4">By Status</p>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={statBar} layout="vertical">
-              <XAxis type="number" tick={{ fill: '#7a8fa8', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fill: '#7a8fa8', fontSize: 11 }} axisLine={false} tickLine={false} width={80} />
+              <XAxis type="number" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} width={80} />
               <Tooltip {...TIP} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                {statBar.map(e => <Cell key={e.name} fill={STAT_COLORS[e.name.replace(' ', '_')] || '#7a8fa8'} />)}
+                {statBar.map(e => <Cell key={e.name} fill={STAT_COLORS[e.name.replace(' ', '_')] || '#64748b'} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>

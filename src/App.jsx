@@ -27,14 +27,14 @@ export default function App() {
           position="top-right"
           toastOptions={{
             style: {
-              background: '#161c26',
-              color: '#e2eaf5',
-              border: '1px solid #1e2736',
+              background: '#ffffff',
+              color: '#0f172a',
+              border: '1px solid #e2e8f0',
               fontSize: 13,
               fontFamily: '"DM Sans", system-ui',
             },
-            success: { iconTheme: { primary: '#10b981', secondary: '#161c26' } },
-            error: { iconTheme: { primary: '#ef4444', secondary: '#161c26' } },
+            success: { iconTheme: { primary: '#10b981', secondary: '#ffffff' } },
+            error: { iconTheme: { primary: '#ef4444', secondary: '#ffffff' } },
           }}
         />
         <Routes>

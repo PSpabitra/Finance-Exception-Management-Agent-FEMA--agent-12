@@ -6,7 +6,7 @@ import { ShieldAlert, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const SEV_COLORS = { CRITICAL: '#ef4444', HIGH: '#f97316', MEDIUM: '#eab308', LOW: '#10b981' }
-const TIP = { contentStyle: { background: '#161c26', border: '1px solid #1e2736', borderRadius: 8, color: '#e2eaf5', fontSize: 12 } }
+const TIP = { contentStyle: { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, color: '#0f172a', fontSize: 12 } }
 
 export default function RiskRegister() {
   const [risks, setRisks] = useState([])
@@ -51,7 +51,7 @@ export default function RiskRegister() {
                   <tr><td colSpan={6}><Empty icon={ShieldAlert} message="No active risks" /></td></tr>
                 ) : risks.map((r, i) => (
                   <tr key={r.id} className="border-b border-surface-border hover:bg-surface-muted/30 transition-colors">
-                    <td className="td text-center font-display font-bold text-xs" style={{ color: i < 3 ? '#f59e0b' : '#3a4d65' }}>
+                    <td className="td text-center font-display font-bold text-xs" style={{ color: i < 3 ? '#2563eb' : '#94a3b8' }}>
                       #{i + 1}
                     </td>
                     <td className="td">
@@ -74,9 +74,9 @@ export default function RiskRegister() {
           <p className="text-sm font-semibold text-ink mb-4">Risk Distribution</p>
           <ResponsiveContainer width="100%" height={220}>
             <RadarChart data={radarData}>
-              <PolarGrid stroke="#1e2736" />
-              <PolarAngleAxis dataKey="severity" tick={{ fill: '#7a8fa8', fontSize: 11 }} />
-              <Radar name="Count" dataKey="count" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.18} strokeWidth={2} />
+              <PolarGrid stroke="#e2e8f0" />
+              <PolarAngleAxis dataKey="severity" tick={{ fill: '#64748b', fontSize: 11 }} />
+              <Radar name="Count" dataKey="count" stroke="#2563eb" fill="#2563eb" fillOpacity={0.18} strokeWidth={2} />
               <Tooltip {...TIP} />
             </RadarChart>
           </ResponsiveContainer>

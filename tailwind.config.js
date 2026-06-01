@@ -13,16 +13,16 @@ export default {
       },
       colors: {
         surface: {
-          DEFAULT: '#0f1117',
-          card: '#161c26',
-          border: '#1e2736',
-          muted: '#242f42',
+          DEFAULT: '#f8fafc',
+          card: '#ffffff',
+          border: '#e2e8f0',
+          muted: '#cbd5e1',
         },
         brand: {
-          DEFAULT: '#f59e0b',
-          light: '#fcd34d',
-          dark: '#d97706',
-          glow: 'rgba(245,158,11,0.15)',
+          DEFAULT: '#2563eb',
+          light: '#3b82f6',
+          dark: '#1d4ed8',
+          glow: 'rgba(37,99,235,0.15)',
         },
         danger: {
           DEFAULT: '#ef4444',
@@ -33,22 +33,22 @@ export default {
           glow: 'rgba(16,185,129,0.15)',
         },
         info: {
-          DEFAULT: '#3b82f6',
-          glow: 'rgba(59,130,246,0.15)',
+          DEFAULT: '#0ea5e9',
+          glow: 'rgba(14,165,233,0.15)',
         },
         warn: {
           DEFAULT: '#f59e0b',
         },
         ink: {
-          DEFAULT: '#e2eaf5',
-          muted: '#7a8fa8',
-          faint: '#3a4d65',
+          DEFAULT: '#0f172a',
+          muted: '#475569',
+          faint: '#94a3b8',
         },
       },
       boxShadow: {
-        glow: '0 0 20px rgba(245,158,11,0.15)',
+        glow: '0 0 20px rgba(37,99,235,0.15)',
         'glow-red': '0 0 20px rgba(239,68,68,0.2)',
-        card: '0 4px 24px rgba(0,0,0,0.4)',
+        card: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
       },
       animation: {
         'fade-in': 'fadeIn 0.4s ease forwards',
