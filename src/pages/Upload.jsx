@@ -10,7 +10,7 @@ const TYPE_COLORS = { xlsx: 'text-emerald-400', csv: 'text-blue-400', pdf: 'text
 const fmtSize = b => b > 1e6 ? `${(b / 1e6).toFixed(1)} MB` : `${(b / 1024).toFixed(0)} KB`
 
 export default function UploadPage() {
-  const [file, setFile] = useState(null)
+  const [files, setFiles] = useState([])
   const [category, setCategory] = useState('P&L Statement')
   const [uploading, setUploading] = useState(false)
   const [documents, setDocuments] = useState([])
@@ -20,24 +20,37 @@ export default function UploadPage() {
 
   const loadDocs = () => {
     setDocsLoading(true)
-    getDocs().then(r => setDocuments(r.data)).catch(() => {}).finally(() => setDocsLoading(false))
+    getDocs().then(r => setDocuments(r.data)).catch(() => { }).finally(() => setDocsLoading(false))
   }
   useEffect(() => { loadDocs() }, [])
 
   const handleUpload = async () => {
-    if (!file) return toast.error('Select a file first')
-    const fd = new FormData()
-    fd.append('file', file)
-    fd.append('document_category', category)
+    if (files.length === 0) return toast.error('Select at least one file first')
     setUploading(true)
-    try {
-      await uploadDoc(fd)
-      toast.success(`${file.name} uploaded & parsed!`)
-      setFile(null)
-      loadDocs()
-    } catch (err) {
-      toast.error(err.response?.data?.detail || 'Upload failed')
-    } finally { setUploading(false) }
+    let success = 0
+    let fail = 0
+
+    for (const f of files) {
+      const fd = new FormData()
+      fd.append('file', f)
+      fd.append('document_category', category)
+      try {
+        await uploadDoc(fd)
+        success++
+      } catch (err) {
+        fail++
+        toast.error(`Failed to upload ${f.name}`)
+      }
+    }
+
+    if (success > 0) toast.success(`${success} file(s) uploaded & parsed!`)
+    if (fail === 0) setFiles([])
+    loadDocs()
+    setUploading(false)
+  }
+
+  const removeFile = (fileToRemove) => {
+    setFiles(files.filter(f => f !== fileToRemove))
   }
 
   return (
@@ -52,27 +65,58 @@ export default function UploadPage() {
         )}
         onDragOver={e => { e.preventDefault(); setDrag(true) }}
         onDragLeave={() => setDrag(false)}
-        onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) setFile(f) }}
+        onDrop={e => {
+          e.preventDefault()
+          setDrag(false)
+          if (e.dataTransfer.files?.length) {
+            setFiles(prev => [...prev, ...Array.from(e.dataTransfer.files)])
+          }
+        }}
         onClick={() => fileRef.current?.click()}
       >
-        <input ref={fileRef} type="file" accept=".xlsx,.csv,.pdf,.docx,.xls,.doc" className="hidden" onChange={e => setFile(e.target.files[0])} />
-        {file ? (
-          <div>
-            <div className="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mx-auto mb-3">
-              <FileText size={22} className="text-brand" />
-            </div>
-            <p className="text-sm font-semibold text-ink">{file.name}</p>
-            <p className="text-xs text-ink-muted mt-1">{fmtSize(file.size)}</p>
-            <button className="mt-3 text-xs text-ink-faint hover:text-red-400 flex items-center gap-1 mx-auto"
-              onClick={e => { e.stopPropagation(); setFile(null) }}>
-              <X size={11} /> Remove
+        <input
+          ref={fileRef}
+          type="file"
+          multiple
+          accept=".xlsx,.csv,.pdf,.docx,.xls,.doc"
+          className="hidden"
+          onChange={e => {
+            if (e.target.files?.length) {
+              setFiles(prev => [...prev, ...Array.from(e.target.files)])
+            }
+          }}
+        />
+
+        {files.length > 0 ? (
+          <div className="space-y-3" onClick={e => e.stopPropagation()}>
+            {files.map((f, i) => (
+              <div key={i} className="flex items-center justify-between bg-surface-card border border-surface-border p-3 rounded-lg text-left">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-md bg-brand/10 border border-brand/20 flex items-center justify-center">
+                    <FileText size={16} className="text-brand" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-semibold text-ink">{f.name}</p>
+                    <p className="text-[10px] text-ink-muted">{fmtSize(f.size)}</p>
+                  </div>
+                </div>
+                <button
+                  className="p-1.5 text-ink-faint hover:text-red-400 hover:bg-danger/10 rounded-md transition-colors"
+                  onClick={() => removeFile(f)}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+            <button className="mt-2 text-xs text-brand font-medium hover:underline" onClick={() => fileRef.current?.click()}>
+              + Add more files
             </button>
           </div>
         ) : (
           <>
             <Upload size={32} className={clsx('mx-auto mb-3', drag ? 'text-brand' : 'text-ink-faint')} />
             <p className="text-sm text-ink-muted">Drag & drop or <span className="text-brand">click to browse</span></p>
-            <p className="text-xs text-ink-faint mt-1">XLSX · CSV · PDF · DOCX — max 50 MB</p>
+            <p className="text-xs text-ink-faint mt-1">Multiple files supported (XLSX, CSV, PDF, DOCX)</p>
           </>
         )}
       </div>
@@ -87,11 +131,11 @@ export default function UploadPage() {
 
       <button
         onClick={handleUpload}
-        disabled={!file || uploading}
+        disabled={files.length === 0 || uploading}
         className="btn-primary w-full justify-center py-3 text-base"
       >
         <Upload size={15} />
-        {uploading ? 'Uploading & Parsing…' : 'Upload & Analyze'}
+        {uploading ? 'Uploading & Parsing…' : `Upload ${files.length > 0 ? files.length : ''} File(s)`}
       </button>
 
       {/* Documents list */}
