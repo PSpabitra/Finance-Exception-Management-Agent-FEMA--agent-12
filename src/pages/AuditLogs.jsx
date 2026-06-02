@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getAuditLogs } from '../services/api'
-import { PageHeader, Spinner, Empty } from '../components/UI'
+import { PageHeader, Spinner, Empty, Pagination } from '../components/UI'
 import { ClipboardList, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
@@ -18,12 +18,21 @@ const ACTION_STYLES = {
 export default function AuditLogs() {
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 8
 
   const load = () => {
     setLoading(true)
-    getAuditLogs({ limit: 100 }).then(r => setLogs(r.data)).catch(() => toast.error('Failed to load audit logs')).finally(() => setLoading(false))
+    getAuditLogs({ limit: 1000 }).then(r => setLogs(r.data)).catch(() => toast.error('Failed to load audit logs')).finally(() => setLoading(false))
   }
   useEffect(() => { load() }, [])
+
+  const totalPages = Math.ceil(logs.length / PAGE_SIZE)
+  const paginatedLogs = logs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  useEffect(() => {
+    setPage(1)
+  }, [logs])
 
   return (
     <div className="animate-in">
@@ -48,7 +57,7 @@ export default function AuditLogs() {
                 <tr><td colSpan={5}><Spinner /></td></tr>
               ) : logs.length === 0 ? (
                 <tr><td colSpan={5}><Empty icon={ClipboardList} message="No audit events yet" /></td></tr>
-              ) : logs.map(log => (
+              ) : paginatedLogs.map(log => (
                 <tr key={log.id} className="border-b border-surface-border hover:bg-surface-muted/20 transition-colors">
                   <td className="td font-mono text-[11px] text-ink-muted">{new Date(log.created_at).toLocaleString()}</td>
                   <td className="td">
@@ -71,6 +80,13 @@ export default function AuditLogs() {
             </tbody>
           </table>
         </div>
+        {!loading && logs.length > 0 && (
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        )}
       </div>
     </div>
   )

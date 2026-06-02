@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getRiskRegister } from '../services/api'
-import { SevBadge, StatusBadge, RiskBar, PageHeader, Spinner, Empty } from '../components/UI'
+import { SevBadge, StatusBadge, RiskBar, PageHeader, Spinner, Empty, Pagination } from '../components/UI'
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts'
 import { ShieldAlert, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -11,6 +11,8 @@ const TIP = { contentStyle: { background: '#ffffff', border: '1px solid #e2e8f0'
 export default function RiskRegister() {
   const [risks, setRisks] = useState([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 8
 
   const load = () => {
     setLoading(true)
@@ -22,6 +24,13 @@ export default function RiskRegister() {
     severity: sev,
     count: risks.filter(r => r.severity === sev).length,
   }))
+
+  const totalPages = Math.ceil(risks.length / PAGE_SIZE)
+  const paginatedRisks = risks.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  useEffect(() => {
+    setPage(1)
+  }, [risks.length])
 
   return (
     <div className="animate-in">
@@ -49,10 +58,10 @@ export default function RiskRegister() {
                   <tr><td colSpan={6}><Spinner /></td></tr>
                 ) : risks.length === 0 ? (
                   <tr><td colSpan={6}><Empty icon={ShieldAlert} message="No active risks" /></td></tr>
-                ) : risks.map((r, i) => (
+                ) : paginatedRisks.map((r, i) => (
                   <tr key={r.id} className="border-b border-surface-border hover:bg-surface-muted/30 transition-colors">
-                    <td className="td text-center font-display font-bold text-xs" style={{ color: i < 3 ? '#2563eb' : '#94a3b8' }}>
-                      #{i + 1}
+                    <td className="td text-center font-display font-bold text-xs" style={{ color: ((page - 1) * PAGE_SIZE + i) < 3 ? '#2563eb' : '#94a3b8' }}>
+                      #{((page - 1) * PAGE_SIZE) + i + 1}
                     </td>
                     <td className="td">
                       <p className="text-xs font-medium text-ink line-clamp-1 max-w-[200px]">{r.title}</p>
@@ -67,6 +76,13 @@ export default function RiskRegister() {
               </tbody>
             </table>
           </div>
+          {!loading && risks.length > 0 && (
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          )}
         </div>
 
         {/* Radar + breakdown */}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getExceptions, detectExceptions } from '../services/api'
-import { SevBadge, StatusBadge, RiskBar, PageHeader, Spinner, Empty } from '../components/UI'
+import { SevBadge, StatusBadge, RiskBar, PageHeader, Spinner, Empty, Pagination } from '../components/UI'
 import { AlertTriangle, Zap, RefreshCw, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -14,6 +14,8 @@ export default function Exceptions() {
   const [detecting, setDetecting] = useState(false)
   const [filterStatus, setFilterStatus] = useState('')
   const [filterSeverity, setFilterSeverity] = useState('')
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 7
 
   const load = () => {
     setLoading(true)
@@ -24,6 +26,13 @@ export default function Exceptions() {
   }
 
   useEffect(() => { load() }, [filterStatus, filterSeverity])
+
+  const totalPages = Math.ceil(exceptions.length / PAGE_SIZE)
+  const paginatedExceptions = exceptions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  useEffect(() => {
+    setPage(1)
+  }, [filterStatus, filterSeverity, exceptions.length])
 
   const handleDetect = async () => {
     setDetecting(true)
@@ -78,7 +87,7 @@ export default function Exceptions() {
                 <tr><td colSpan={8}><Spinner /></td></tr>
               ) : exceptions.length === 0 ? (
                 <tr><td colSpan={8}><Empty icon={AlertTriangle} message="No exceptions found. Try AI detection." /></td></tr>
-              ) : exceptions.map(exc => (
+              ) : paginatedExceptions.map(exc => (
                 <tr key={exc.id} className="border-b border-surface-border hover:bg-surface-muted/30 transition-colors">
                   <td className="td font-mono text-brand text-xs font-semibold">{exc.case_number}</td>
                   <td className="td">
@@ -104,6 +113,13 @@ export default function Exceptions() {
             </tbody>
           </table>
         </div>
+        {!loading && exceptions.length > 0 && (
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        )}
       </div>
     </div>
   )
