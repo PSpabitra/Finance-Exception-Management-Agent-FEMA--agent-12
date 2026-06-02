@@ -47,7 +47,7 @@ export default function ExceptionDetail() {
   const rca = exc.ai_analysis?.rca
 
   return (
-    <div className="animate-in max-w-4xl">
+    <div className="animate-in w-full">
       <button onClick={() => navigate('/exceptions')} className="flex items-center gap-1.5 text-ink-muted hover:text-ink text-sm mb-6 transition-colors">
         <ArrowLeft size={14} /> Back to Exceptions
       </button>

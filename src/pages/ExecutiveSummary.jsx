@@ -28,7 +28,7 @@ export default function ExecutiveSummary() {
   const hs = HEALTH_STYLES[data?.overall_health] || HEALTH_STYLES.UNKNOWN
 
   return (
-    <div className="animate-in max-w-4xl">
+    <div className="animate-in w-full">
       <PageHeader title="Executive Summary" sub="AI-generated CFO-level financial exception report">
         <button onClick={generate} disabled={loading} className="btn-primary">
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />

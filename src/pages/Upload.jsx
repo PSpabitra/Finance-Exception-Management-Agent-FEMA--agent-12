@@ -49,7 +49,7 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="animate-in max-w-2xl">
+    <div className="animate-in w-full">
       <PageHeader title="Upload Documents" sub="Upload XLSX, CSV, PDF, or DOCX files for AI analysis" />
 
       {/* Drop zone */}

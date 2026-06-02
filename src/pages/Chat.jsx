@@ -12,6 +12,34 @@ const SUGGESTIONS = [
   'Which exceptions need CFO sign-off?',
 ]
 
+function FormattedMessage({ text, isUser }) {
+  if (!text) return null;
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return (
+            <strong key={i} className={isUser ? "font-semibold text-white" : "font-semibold text-ink"}>
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+        return (
+          <span key={i}>
+            {part.split('\n').map((line, j, arr) => (
+              <span key={j}>
+                {line}
+                {j < arr.length - 1 && <div className="h-1.5" />}
+              </span>
+            ))}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 export default function Chat() {
   const { user } = useAuth()
   const [messages, setMessages] = useState([
@@ -38,7 +66,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="animate-in flex flex-col h-[calc(100vh-120px)] max-w-3xl mx-auto">
+    <div className="animate-in flex flex-col h-[calc(90vh-120px)] w-full">
       <div className="mb-4">
         <h1 className="text-xl font-display font-bold text-ink flex items-center gap-2">
           <MessageSquare size={18} className="text-brand" /> Finance Chat Assistant
@@ -65,7 +93,7 @@ export default function Chat() {
                 : 'bg-brand text-surface font-medium rounded-br-sm',
               m.error && 'border-danger/30 text-red-400'
             )}>
-              {m.text}
+              <FormattedMessage text={m.text} isUser={m.role === 'user'} />
               {m.intent && m.role === 'assistant' && (
                 <p className="text-[10px] text-ink-faint mt-2 font-mono">intent: {m.intent}</p>
               )}
