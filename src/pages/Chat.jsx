@@ -1,16 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
-import { sendChat } from '../services/api'
+import { sendChat, getExceptions } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { Send, Bot, User, MessageSquare } from 'lucide-react'
 import clsx from 'clsx'
 
-const SUGGESTIONS = [
-  'What are the most critical exceptions right now?',
-  'Summarize our financial risk exposure',
-  'What actions should I take for the cash flow risk?',
-  'Explain the OPEX overrun exception',
-  'Which exceptions need CFO sign-off?',
-]
 
 function FormattedMessage({ text, isUser }) {
   if (!text) return null;
@@ -47,9 +40,34 @@ export default function Chat() {
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [suggestions, setSuggestions] = useState([
+    // 'What are the most critical exceptions right now?',
+    // 'Summarize our financial risk exposure',
+    // 'What actions should I take for the cash flow risk?',
+    // 'Explain the OPEX overrun exception',
+    // 'Which exceptions need CFO sign-off?',
+  ])
   const bottomRef = useRef()
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
+
+  useEffect(() => {
+    async function fetchDynamicSuggestions() {
+      try {
+        const res = await getExceptions({ status: 'OPEN', limit: 3 })
+        const exceptions = Array.isArray(res.data) ? res.data : (res.data?.items || [])
+        if (exceptions.length > 0) {
+          const dyn = exceptions.slice(0, 3).map(e => `Explain the "${e.title || e.exception_type}"`)
+          dyn.push('Summarize our overall financial risk exposure')
+          dyn.push('Which exceptions need CFO sign-off?')
+          setSuggestions([...new Set(dyn)].slice(0, 5))
+        }
+      } catch (err) {
+        console.error('Failed to load dynamic suggestions', err)
+      }
+    }
+    fetchDynamicSuggestions()
+  }, [])
 
   const send = async text => {
     const msg = text || input.trim()
@@ -71,7 +89,7 @@ export default function Chat() {
         <h1 className="text-xl font-display font-bold text-ink flex items-center gap-2">
           <MessageSquare size={18} className="text-brand" /> Finance Chat Assistant
         </h1>
-        <p className="text-sm text-ink-muted mt-1">AI-powered financial exception insights via Mistral</p>
+        <p className="text-sm text-ink-muted mt-1">AI-powered financial exception insights</p>
       </div>
 
       {/* Messages */}
@@ -120,8 +138,8 @@ export default function Chat() {
 
       {/* Suggestions */}
       <div className="flex gap-2 flex-wrap py-3 border-t border-surface-border">
-        {SUGGESTIONS.map(s => (
-          <button key={s} onClick={() => send(s)} className="text-xs px-3 py-1.5 rounded-full bg-surface-card border border-surface-border text-ink-muted hover:border-brand/30 hover:text-brand transition-all">
+        {suggestions.map((s, i) => (
+          <button key={`${s}-${i}`} onClick={() => send(s)} className="text-xs px-3 py-1.5 rounded-full bg-surface-card border border-surface-border text-ink-muted hover:border-brand/30 hover:text-brand transition-all">
             {s}
           </button>
         ))}
