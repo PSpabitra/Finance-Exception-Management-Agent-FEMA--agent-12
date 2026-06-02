@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { getExecutiveSummary } from '../services/api'
 import { PageHeader, Spinner } from '../components/UI'
 import { FileText, RefreshCw, CheckCircle, AlertTriangle, Lightbulb } from 'lucide-react'
@@ -15,6 +17,14 @@ const HEALTH_STYLES = {
 export default function ExecutiveSummary() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
+  const { user } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (user?.role === 'Finance Controller') {
+      navigate('/dashboard')
+    }
+  }, [user, navigate])
 
   const generate = async () => {
     setLoading(true)

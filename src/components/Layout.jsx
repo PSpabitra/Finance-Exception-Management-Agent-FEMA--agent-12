@@ -32,7 +32,7 @@ export default function Layout({ children }) {
   const activeLabel = NAV.find(n => isActive(n.to))?.label || 'FEMA'
 
   const filteredNav = NAV.filter(n => {
-    if (user?.role === 'Finance Controller' && n.label === 'Upload Docs') return false;
+    if (user?.role === 'Finance Controller' && (n.label === 'Upload Docs' || n.label === 'Executive Summary')) return false;
     return true;
   });
 
