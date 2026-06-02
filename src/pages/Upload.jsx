@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { uploadDoc, getDocs } from '../services/api'
 import { PageHeader, Empty, Spinner } from '../components/UI'
 import { Upload, FileText, CheckCircle, AlertCircle, X } from 'lucide-react'
@@ -17,6 +19,14 @@ export default function UploadPage() {
   const [drag, setDrag] = useState(false)
   const [docsLoading, setDocsLoading] = useState(true)
   const fileRef = useRef()
+  const { user } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (user?.role === 'Finance Controller') {
+      navigate('/dashboard')
+    }
+  }, [user, navigate])
 
   const loadDocs = () => {
     setDocsLoading(true)

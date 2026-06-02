@@ -51,23 +51,23 @@ export default function Chat() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
-  useEffect(() => {
-    async function fetchDynamicSuggestions() {
-      try {
-        const res = await getExceptions({ status: 'OPEN', limit: 3 })
-        const exceptions = Array.isArray(res.data) ? res.data : (res.data?.items || [])
-        if (exceptions.length > 0) {
-          const dyn = exceptions.slice(0, 3).map(e => `Explain the "${e.title || e.exception_type}"`)
-          dyn.push('Summarize our overall financial risk exposure')
-          dyn.push('Which exceptions need CFO sign-off?')
-          setSuggestions([...new Set(dyn)].slice(0, 5))
-        }
-      } catch (err) {
-        console.error('Failed to load dynamic suggestions', err)
-      }
-    }
-    fetchDynamicSuggestions()
-  }, [])
+  // useEffect(() => {
+  //   async function fetchDynamicSuggestions() {
+  //     try {
+  //       const res = await getExceptions({ status: 'OPEN', limit: 3 })
+  //       const exceptions = Array.isArray(res.data) ? res.data : (res.data?.items || [])
+  //       if (exceptions.length > 0) {
+  //         const dyn = exceptions.slice(0, 3).map(e => `Explain the "${e.title || e.exception_type}"`)
+  //         dyn.push('Summarize our overall financial risk exposure')
+  //         dyn.push('Which exceptions need CFO sign-off?')
+  //         setSuggestions([...new Set(dyn)].slice(0, 5))
+  //       }
+  //     } catch (err) {
+  //       console.error('Failed to load dynamic suggestions', err)
+  //     }
+  //   }
+  //   fetchDynamicSuggestions()
+  // }, [])
 
   const send = async text => {
     const msg = text || input.trim()

@@ -31,6 +31,11 @@ export default function Layout({ children }) {
   const isActive = (to) => location.pathname.startsWith(to)
   const activeLabel = NAV.find(n => isActive(n.to))?.label || 'FEMA'
 
+  const filteredNav = NAV.filter(n => {
+    if (user?.role === 'Finance Controller' && n.label === 'Upload Docs') return false;
+    return true;
+  });
+
   return (
     <div className="flex h-screen bg-surface overflow-hidden">
       {/* Mobile overlay */}
@@ -39,7 +44,7 @@ export default function Layout({ children }) {
       )}
 
       <Sidebar
-        NAV={NAV}
+        NAV={filteredNav}
         collapsed={collapsed}
         setCollapsed={setCollapsed}
         mobileOpen={mobileOpen}
