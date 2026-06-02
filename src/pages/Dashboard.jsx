@@ -33,11 +33,11 @@ export default function Dashboard() {
       />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         <StatCard label="Total" value={data.total_exceptions} icon={AlertTriangle} color="text-brand" />
         <StatCard label="Open" value={data.open_exceptions} icon={Zap} color="text-blue-400" />
         <StatCard label="Critical" value={data.critical_exceptions} icon={TrendingDown} color="text-red-400" />
-        <StatCard label="Resolved / Mo." value={data.resolved_this_month} icon={CheckCircle} color="text-emerald-400" />
+        {/* <StatCard label="Resolved / Mo." value={data.resolved_this_month} icon={CheckCircle} color="text-emerald-400" /> */}
         <StatCard label="Avg Risk" value={`${data.avg_risk_score}/10`} icon={Activity} color="text-yellow-400" />
         <StatCard label="Documents" value={data.total_documents} icon={FileText} color="text-purple-400" />
       </div>

@@ -27,7 +27,7 @@ export default function Layout({ children }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  const handleLogout = () => { logout(); navigate('/login') }
+  const handleLogout = () => { logout(); navigate('/') }
   const isActive = (to) => location.pathname.startsWith(to)
   const activeLabel = NAV.find(n => isActive(n.to))?.label || 'FEMA'
 
