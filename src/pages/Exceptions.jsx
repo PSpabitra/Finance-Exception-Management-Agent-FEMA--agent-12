@@ -79,14 +79,15 @@ export default function Exceptions() {
                 <th className="th hidden lg:table-cell">Risk</th>
                 <th className="th">Status</th>
                 <th className="th hidden lg:table-cell">Variance %</th>
+                <th className="th hidden lg:table-cell">Created At</th>
                 <th className="th w-10"></th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8}><Spinner /></td></tr>
+                <tr><td colSpan={9}><Spinner /></td></tr>
               ) : exceptions.length === 0 ? (
-                <tr><td colSpan={8}><Empty icon={AlertTriangle} message="No exceptions found. Try AI detection." /></td></tr>
+                <tr><td colSpan={9}><Empty icon={AlertTriangle} message="No exceptions found. Try AI detection." /></td></tr>
               ) : paginatedExceptions.map(exc => (
                 <tr key={exc.id} className="border-b border-surface-border hover:bg-surface-muted/30 transition-colors">
                   <td className="td font-mono text-brand text-xs font-semibold">{exc.case_number}</td>
@@ -102,6 +103,9 @@ export default function Exceptions() {
                     <span className={exc.variance_pct < 0 ? 'text-red-400' : 'text-emerald-400'}>
                       {exc.variance_pct != null ? `${exc.variance_pct > 0 ? '+' : ''}${exc.variance_pct?.toFixed(1)}%` : '—'}
                     </span>
+                  </td>
+                  <td className="td hidden lg:table-cell text-ink-muted text-[11px] whitespace-nowrap">
+                    {exc.created_at ? new Date(exc.created_at.replace(' ', 'T')).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                   </td>
                   <td className="td">
                     <Link to={`/exceptions/${exc.id}`} className="text-ink-faint hover:text-brand transition-colors">
