@@ -27,24 +27,19 @@ export default function UploadPage() {
   const handleUpload = async () => {
     if (files.length === 0) return toast.error('Select at least one file first')
     setUploading(true)
-    let success = 0
-    let fail = 0
-
+    const fd = new FormData()
     for (const f of files) {
-      const fd = new FormData()
-      fd.append('file', f)
-      fd.append('document_category', category)
-      try {
-        await uploadDoc(fd)
-        success++
-      } catch (err) {
-        fail++
-        toast.error(`Failed to upload ${f.name}`)
-      }
+      fd.append('files', f)
+    }
+    fd.append('document_category', category)
+    try {
+      await uploadDoc(fd)
+      toast.success(`${files.length} file(s) uploaded & parsed!`)
+      setFiles([])
+    } catch (err) {
+      toast.error(`Failed to upload files`)
     }
 
-    if (success > 0) toast.success(`${success} file(s) uploaded & parsed!`)
-    if (fail === 0) setFiles([])
     loadDocs()
     setUploading(false)
   }
