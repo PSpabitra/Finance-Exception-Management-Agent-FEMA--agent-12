@@ -17,6 +17,7 @@ export default function ExceptionDetail() {
   const [comment, setComment] = useState('')
   const [status, setStatus] = useState('')
   const [respForm, setRespForm] = useState({ root_cause: '', corrective_action: '', expected_resolution: '' })
+  const [submittingResponse, setSubmittingResponse] = useState(false)
 
   useEffect(() => {
     Promise.all([getException(id), getComments(id), getCaseResponses(id)])
@@ -49,6 +50,7 @@ export default function ExceptionDetail() {
       toast.error('All fields are required')
       return
     }
+    setSubmittingResponse(true)
     try {
       const res = await submitCaseResponse(id, respForm)
       setResponses([...responses, res.data])
@@ -59,6 +61,7 @@ export default function ExceptionDetail() {
       setExc(updatedExc.data)
       setStatus(updatedExc.data.status)
     } catch { toast.error('Failed to submit response') }
+    finally { setSubmittingResponse(false) }
   }
 
   if (loading) return <Spinner />
@@ -233,7 +236,9 @@ export default function ExceptionDetail() {
                 <input className="input w-full" required value={respForm.expected_resolution} onChange={e => setRespForm({ ...respForm, expected_resolution: e.target.value })} placeholder="e.g. Next quarter, Within 30 days" />
               </div>
               <div className="pt-2">
-                <button type="submit" className="btn-primary w-full">Submit Response</button>
+                <button type="submit" disabled={submittingResponse} className="btn-primary h-11 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  {submittingResponse ? <><Spinner size={16} /> Submitting...</> : 'Submit Response'}
+                </button>
               </div>
             </div>
           </form>
