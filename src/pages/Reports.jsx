@@ -1,79 +1,60 @@
-import React, { useState } from 'react'
-import { PageHeader } from '../components/UI'
-import { generateReport } from '../services/api'
+import React, { useState, useEffect } from 'react'
+import { PageHeader, Spinner } from '../components/UI'
+import { getAvailableReports, generateReport } from '../services/api'
 import { FileText, File, DownloadCloud, FileBarChart, ShieldAlert, Activity, Users, Settings } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const CATEGORIES = [
-    {
-        id: 'exception',
-        label: 'Exception Management',
-        icon: ShieldAlert,
-        reports: [
-            'Open Exceptions', 'Closed Exceptions', 'Critical Exceptions', 'Recurring Exceptions'
-        ]
-    },
-    {
-        id: 'risk',
-        label: 'Financial Risk',
-        icon: Activity,
-        reports: [
-            'Margin Erosion Analysis', 'Cash Flow Risk Analysis', 'Receivables Ageing Risk Report', 'Liquidity & Covenant Risk Report'
-        ]
-    },
-    {
-        id: 'operational',
-        label: 'Operational',
-        icon: Settings,
-        reports: [
-            'SLA Performance Report', 'Resolution Time Analysis', 'Owner Performance Report', 'Escalation Tracking Report'
-        ]
-    },
-    {
-        id: 'executive',
-        label: 'Executive Reports',
-        icon: FileBarChart,
-        reports: [
-            'CFO Weekly Digest', 'Monthly Finance Health Report', 'Quarterly Executive Summary', 'Board Presentation Pack'
-        ]
-    },
-    {
-        id: 'governance',
-        label: 'Governance & Audit',
-        icon: Users,
-        reports: [
-            'Complete Audit Trail Report', 'User Activity Report', 'Escalation Approval History', 'Compliance Monitoring Report'
-        ]
-    }
-]
+const ICON_MAP = {
+    ShieldAlert: ShieldAlert,
+    Activity: Activity,
+    Settings: Settings,
+    FileBarChart: FileBarChart,
+    Users: Users
+}
 
 export default function Reports() {
-    const [loading, setLoading] = useState(null)
-    const [activeTab, setActiveTab] = useState(CATEGORIES[0].id)
+    const [categories, setCategories] = useState([])
+    const [loadingData, setLoadingData] = useState(true)
+    const [loadingAction, setLoadingAction] = useState(null)
+    const [activeTab, setActiveTab] = useState(null)
+    const [period, setPeriod] = useState("All Time")
+    const [userContext, setUserContext] = useState("")
+
+    useEffect(() => {
+        getAvailableReports()
+            .then(res => {
+                setCategories(res.data)
+                if (res.data.length > 0) setActiveTab(res.data[0].id)
+            })
+            .catch(() => toast.error('Failed to load report configurations'))
+            .finally(() => setLoadingData(false))
+    }, [])
 
     const handleDownload = async (reportName, format) => {
-        setLoading(`${reportName}-${format}`)
+        setLoadingAction(`${reportName}-${format}`)
         try {
-            const res = await generateReport({ report_type: reportName, format })
+            const res = await generateReport({ report_type: reportName, format, period, context: userContext })
             const blob = new Blob([res.data])
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.setAttribute('download', `${reportName.replace(/\s+/g, '_')}.${format}`)
+            link.setAttribute('download', `${reportName.replace(/\s+/g, '_')}_${period.replace(' ', '')}.${format}`)
             document.body.appendChild(link)
             link.click()
             link.parentNode.removeChild(link)
             window.URL.revokeObjectURL(url)
-            toast.success(`${reportName} generated successfully`)
+            toast.success(`${reportName} (${period}) generated successfully`)
         } catch (err) {
             toast.error(`Failed to generate ${reportName}`)
         } finally {
-            setLoading(null)
+            setLoadingAction(null)
         }
     }
 
-    const activeReports = CATEGORIES.find(c => c.id === activeTab)?.reports || []
+    if (loadingData) return <Spinner />
+
+    const activeReports = categories.find(c => c.id === activeTab)?.reports || []
 
     return (
         <div className="animate-in w-full h-full flex flex-col">
@@ -83,17 +64,35 @@ export default function Reports() {
                 </button>
             </PageHeader>
 
+            {/* Parameter Controls */}
+            <div className="card p-4 mb-6 flex items-center bg-surface-muted/30">
+                <div className="w-full sm:w-auto flex items-center gap-4">
+                    <label className="block text-sm font-semibold text-ink-muted uppercase tracking-wider">Report Timeline:</label>
+                    <select
+                        value={period}
+                        onChange={e => setPeriod(e.target.value)}
+                        className="input min-w-[200px] h-10 border-surface-border focus:border-brand bg-surface"
+                    >
+                        <option value="Daily">Daily Status</option>
+                        <option value="Weekly">Weekly Overview</option>
+                        <option value="Monthly">Monthly Digest</option>
+                        <option value="Quarterly">Quarterly Report</option>
+                        <option value="All Time">All Time Record</option>
+                    </select>
+                </div>
+            </div>
+
             {/* Tabs */}
-            <div className="flex border-b border-surface-border mb-6 overflow-x-auto hide-scrollbar">
-                {CATEGORIES.map(c => {
-                    const Icon = c.icon
+            <div className="flex flex-wrap gap-2 border-b border-surface-border mb-8 pb-px">
+                {categories.map(c => {
+                    const Icon = ICON_MAP[c.icon] || FileText
                     const isActive = activeTab === c.id
                     return (
                         <button
                             key={c.id}
                             onClick={() => setActiveTab(c.id)}
                             className={clsx(
-                                "flex items-center gap-2 px-5 py-3 border-b-2 text-sm font-medium transition-colors whitespace-nowrap",
+                                "flex items-center gap-2 px-4 py-2.5 border-b-2 text-sm font-medium transition-colors whitespace-nowrap rounded-t-lg -mb-[2px]",
                                 isActive
                                     ? "border-brand text-brand bg-brand/5"
                                     : "border-transparent text-ink-muted hover:text-ink hover:bg-surface-muted/50"
@@ -108,39 +107,44 @@ export default function Reports() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 slide-in">
                 {activeReports.map(report => (
-                    <div key={report} className="card p-5 group flex flex-col hover:border-brand/30 transition-colors">
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-surface-muted flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <div key={report.name} className="card p-5 group flex flex-col border border-surface-border hover:border-brand/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-surface to-brand/5 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-3xl -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-500"></div>
+
+                        <div className="flex items-start justify-between mb-4 relative z-10">
+                            <div className="w-11 h-11 rounded-xl bg-surface shadow-sm border border-surface-border flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                 <FileText size={20} className="text-ink-muted group-hover:text-brand" />
                             </div>
-                            <div className="bg-emerald-500/10 text-emerald-500 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider">
-                                Ready
+                            <div className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                Live Data
                             </div>
                         </div>
-                        <h3 className="text-ink font-semibold mb-1 text-base leading-tight">{report}</h3>
-                        <p className="text-xs text-ink-muted mb-5 leading-relaxed">
-                            Provides detailed insights and recent data regarding {report.toLowerCase()}.
+
+                        <h3 className="text-ink font-semibold mb-1.5 text-base leading-tight relative z-10 group-hover:text-brand transition-colors">{report.name}</h3>
+                        <p className="text-xs text-ink-muted mb-6 leading-relaxed relative z-10">
+                            {report.desc}
                         </p>
-                        <div className="mt-auto flex items-center gap-2 pt-4 border-t border-surface-border">
+
+                        <div className="mt-auto flex items-center gap-2 pt-4 border-t border-surface-border/60 relative z-10">
                             <button
-                                onClick={() => handleDownload(report, 'pdf')}
-                                disabled={loading === `${report}-pdf`}
-                                className="flex-1 btn-white py-2 flex items-center justify-center gap-2 text-xs border border-surface-border hover:border-surface-muted hover:bg-surface-muted/30 rounded-lg transition-colors"
+                                onClick={() => handleDownload(report.name, 'pdf')}
+                                disabled={loadingAction === `${report.name}-pdf`}
+                                className="flex-1 btn-white py-2.5 flex items-center justify-center gap-2 text-xs border border-surface-border hover:border-red-500/30 hover:bg-red-500/5 hover:text-red-500 rounded-lg transition-all shadow-sm disabled:opacity-50"
                             >
-                                {loading === `${report}-pdf` ? (
-                                    <div className="w-3.5 h-3.5 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+                                {loadingAction === `${report.name}-pdf` ? (
+                                    <div className="w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
                                 ) : (
                                     <File size={14} className="text-red-500" />
                                 )}
                                 PDF
                             </button>
                             <button
-                                onClick={() => handleDownload(report, 'docx')}
-                                disabled={loading === `${report}-docx`}
-                                className="flex-1 btn-white py-2 flex items-center justify-center gap-2 text-xs border border-surface-border hover:border-surface-muted hover:bg-surface-muted/30 rounded-lg transition-colors"
+                                onClick={() => handleDownload(report.name, 'docx')}
+                                disabled={loadingAction === `${report.name}-docx`}
+                                className="flex-1 btn-white py-2.5 flex items-center justify-center gap-2 text-xs border border-surface-border hover:border-blue-500/30 hover:bg-blue-500/5 hover:text-blue-500 rounded-lg transition-all shadow-sm disabled:opacity-50"
                             >
-                                {loading === `${report}-docx` ? (
-                                    <div className="w-3.5 h-3.5 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+                                {loadingAction === `${report.name}-docx` ? (
+                                    <div className="w-3.5 h-3.5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                                 ) : (
                                     <File size={14} className="text-blue-500" />
                                 )}

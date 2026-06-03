@@ -45,6 +45,7 @@ export const getRiskRegister = () => api.get('/api/risk-register')
 export const sendChat = d => api.post('/api/chat', d)
 export const getAuditLogs = p => api.get('/api/audit-logs', { params: p })
 export const getPolicies = () => api.get('/api/policies')
+export const getAvailableReports = () => api.get('/api/reports/available')
 export const generateReport = d => api.post('/api/reports/generate', d, { responseType: 'blob' })
 
 export default api
