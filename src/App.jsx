@@ -14,6 +14,7 @@ import RiskRegister from './pages/RiskRegister'
 import ExecutiveSummary from './pages/ExecutiveSummary'
 import Chat from './pages/Chat'
 import AuditLogs from './pages/AuditLogs'
+import Reports from './pages/Reports'
 
 const Protected = ({ children }) => (
   <ProtectedRoute><Layout>{children}</Layout></ProtectedRoute>
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/executive-summary" element={<Protected><ExecutiveSummary /></Protected>} />
           <Route path="/chat" element={<Protected><Chat /></Protected>} />
           <Route path="/audit-logs" element={<Protected><AuditLogs /></Protected>} />
+          <Route path="/reports" element={<Protected><Reports /></Protected>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>

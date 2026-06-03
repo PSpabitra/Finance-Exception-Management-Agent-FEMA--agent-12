@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
   LayoutDashboard, AlertTriangle, Upload, ShieldAlert,
-  FileText, MessageSquare, ClipboardList
+  FileText, MessageSquare, ClipboardList, DownloadCloud
 } from 'lucide-react'
 
 import Sidebar from './Sidebar'
@@ -18,6 +18,7 @@ const NAV = [
   { to: '/executive-summary', icon: FileText, label: 'Executive Summary' },
   { to: '/chat', icon: MessageSquare, label: 'Finance Chat' },
   { to: '/audit-logs', icon: ClipboardList, label: 'Audit Logs' },
+  { to: '/reports', icon: DownloadCloud, label: 'Reports Center' },
 ]
 
 export default function Layout({ children }) {
