@@ -59,9 +59,9 @@ export default function Reports() {
     return (
         <div className="animate-in w-full h-full flex flex-col">
             <PageHeader title="Reports Center" sub="Generate and download customized financial reports in PDF or DOCX format">
-                <button className="btn-secondary h-9">
+                {/* <button className="btn-secondary h-9">
                     <DownloadCloud size={14} className="mr-2" /> View History
-                </button>
+                </button> */}
             </PageHeader>
 
             {/* Parameter Controls */}
