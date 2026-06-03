@@ -5,8 +5,8 @@ import { SevBadge, StatusBadge, RiskBar, PageHeader, Spinner, Empty, Pagination 
 import { AlertTriangle, Zap, RefreshCw, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const STATUSES = ['', 'OPEN', 'IN_REVIEW', 'RESOLVED', 'ESCALATED', 'CLOSED']
-const SEVERITIES = ['', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
+const STATUSES = ['', 'OPEN', 'AWAITING_RESPONSE', 'UNDER_REVIEW', 'RESOLVED', 'ESCALATED', 'CLOSED']
+const SEVERITIES = ['', 'CRITICAL', 'MATERIAL', 'WARNING', 'INFORMATIONAL']
 
 export default function Exceptions() {
   const [exceptions, setExceptions] = useState([])

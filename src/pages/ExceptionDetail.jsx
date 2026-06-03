@@ -1,24 +1,26 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getException, updateException, addComment, getComments } from '../services/api'
+import { getException, updateException, addComment, getComments, getCaseResponses, submitCaseResponse } from '../services/api'
 import { SevBadge, StatusBadge, RiskBar, Spinner } from '../components/UI'
-import { ArrowLeft, Send, Brain, TrendingDown } from 'lucide-react'
+import { ArrowLeft, Send, Brain, TrendingDown, ClipboardList } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const STATUSES = ['OPEN', 'IN_REVIEW', 'RESOLVED', 'ESCALATED', 'CLOSED']
+const STATUSES = ['OPEN', 'AWAITING_RESPONSE', 'UNDER_REVIEW', 'RESOLVED', 'ESCALATED', 'CLOSED']
 
 export default function ExceptionDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [exc, setExc] = useState(null)
   const [comments, setComments] = useState([])
+  const [responses, setResponses] = useState([])
   const [loading, setLoading] = useState(true)
   const [comment, setComment] = useState('')
   const [status, setStatus] = useState('')
+  const [respForm, setRespForm] = useState({ root_cause: '', corrective_action: '', expected_resolution: '' })
 
   useEffect(() => {
-    Promise.all([getException(id), getComments(id)])
-      .then(([e, c]) => { setExc(e.data); setStatus(e.data.status); setComments(c.data) })
+    Promise.all([getException(id), getComments(id), getCaseResponses(id)])
+      .then(([e, c, r]) => { setExc(e.data); setStatus(e.data.status); setComments(c.data); setResponses(r.data) })
       .catch(() => toast.error('Failed to load'))
       .finally(() => setLoading(false))
   }, [id])
@@ -39,6 +41,24 @@ export default function ExceptionDetail() {
       setComments([...comments, res.data])
       setComment('')
     } catch { toast.error('Failed to add comment') }
+  }
+
+  const handleResponseSubmit = async e => {
+    e.preventDefault()
+    if (!respForm.root_cause || !respForm.corrective_action || !respForm.expected_resolution) {
+      toast.error('All fields are required')
+      return
+    }
+    try {
+      const res = await submitCaseResponse(id, respForm)
+      setResponses([...responses, res.data])
+      setRespForm({ root_cause: '', corrective_action: '', expected_resolution: '' })
+      toast.success('Response submitted. AI Validation triggered.')
+      // Refresh exception to get new status
+      const updatedExc = await getException(id)
+      setExc(updatedExc.data)
+      setStatus(updatedExc.data.status)
+    } catch { toast.error('Failed to submit response') }
   }
 
   if (loading) return <Spinner />
@@ -147,6 +167,78 @@ export default function ExceptionDetail() {
           )}
         </div>
       )}
+
+      {/* Official Responses */}
+      <div className="card p-5 mb-4">
+        <div className="flex items-center gap-2 mb-4">
+          <ClipboardList size={16} className="text-blue-500" />
+          <p className="text-sm font-semibold text-ink">Official Responses</p>
+        </div>
+        <div className="space-y-4 mb-5">
+          {responses.map(r => (
+            <div key={r.id} className="p-4 rounded-xl bg-surface border border-surface-border">
+              <div className="flex items-center justify-between mb-3 pb-3 border-b border-surface-border">
+                <div>
+                  <span className="text-sm font-semibold text-ink">{r.author_name || 'Unknown'}</span>
+                  <span className="text-xs text-ink-muted ml-2">{r.author_role}</span>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-xs text-ink-muted">{new Date(r.created_at).toLocaleString()}</span>
+                  {r.adequacy_score != null && (
+                    <span className={`text-xs font-semibold mt-1 ${r.adequacy_score > 80 ? 'text-success' : 'text-danger'}`}>
+                      AI Score: {r.adequacy_score}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs font-medium text-ink-muted uppercase tracking-wide mb-1">Root Cause</p>
+                  <p className="text-sm text-ink">{r.root_cause}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-ink-muted uppercase tracking-wide mb-1">Corrective Action</p>
+                  <p className="text-sm text-ink">{r.corrective_action}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-ink-muted uppercase tracking-wide mb-1">Expected Resolution</p>
+                  <p className="text-sm text-ink">{r.expected_resolution}</p>
+                </div>
+                {r.ai_feedback && (
+                  <div className="mt-3 p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                    <p className="text-xs font-semibold text-blue-500 mb-1">AI Validation Feedback</p>
+                    <p className="text-xs text-ink-muted">{r.ai_feedback}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {responses.length === 0 && <p className="text-sm text-ink-faint text-center py-4">No official responses submitted yet</p>}
+        </div>
+
+        {['OPEN', 'AWAITING_RESPONSE', 'UNDER_REVIEW'].includes(exc.status) && (
+          <form onSubmit={handleResponseSubmit} className="mt-4 p-4 rounded-xl border border-surface-border bg-surface-muted/30">
+            <p className="text-sm font-semibold text-ink mb-3">Submit Official Response</p>
+            <div className="space-y-3">
+              <div>
+                <label className="label">Root Cause</label>
+                <textarea className="input w-full min-h-[80px]" required value={respForm.root_cause} onChange={e => setRespForm({ ...respForm, root_cause: e.target.value })} placeholder="Explain the root cause..." />
+              </div>
+              <div>
+                <label className="label">Corrective Action</label>
+                <textarea className="input w-full min-h-[80px]" required value={respForm.corrective_action} onChange={e => setRespForm({ ...respForm, corrective_action: e.target.value })} placeholder="What action is being taken?" />
+              </div>
+              <div>
+                <label className="label">Expected Resolution Date/Timeline</label>
+                <input className="input w-full" required value={respForm.expected_resolution} onChange={e => setRespForm({ ...respForm, expected_resolution: e.target.value })} placeholder="e.g. Next quarter, Within 30 days" />
+              </div>
+              <div className="pt-2">
+                <button type="submit" className="btn-primary w-full">Submit Response</button>
+              </div>
+            </div>
+          </form>
+        )}
+      </div>
 
       {/* Comments */}
       <div className="card p-5">

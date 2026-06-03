@@ -37,6 +37,8 @@ export const getException = id => api.get(`/api/exceptions/${id}`)
 export const updateException = (id, d) => api.put(`/api/exceptions/${id}`, d)
 export const addComment = (id, d) => api.post(`/api/exceptions/${id}/comment`, d)
 export const getComments = id => api.get(`/api/exceptions/${id}/comments`)
+export const submitCaseResponse = (id, d) => api.post(`/api/exceptions/${id}/respond`, d)
+export const getCaseResponses = id => api.get(`/api/exceptions/${id}/responses`)
 export const detectExceptions = () => api.post('/api/exceptions/detect/run')
 
 // Core

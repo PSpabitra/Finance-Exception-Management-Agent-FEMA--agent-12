@@ -4,13 +4,14 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 // ── Severity badge ─────────────────────────────────────────────────────────
 const SEV = {
   CRITICAL: 'bg-danger/10 text-red-400 border border-danger/30',
-  HIGH: 'bg-orange-500/10 text-orange-400 border border-orange-500/30',
-  MEDIUM: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30',
-  LOW: 'bg-success/10 text-emerald-400 border border-success/30',
+  MATERIAL: 'bg-orange-500/10 text-orange-400 border border-orange-500/30',
+  WARNING: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30',
+  INFORMATIONAL: 'bg-success/10 text-emerald-400 border border-success/30',
 }
 const STAT = {
   OPEN: 'bg-orange-500/10 text-orange-400 border border-orange-400/30',
-  IN_REVIEW: 'bg-info/10 text-blue-400 border border-info/30',
+  AWAITING_RESPONSE: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30',
+  UNDER_REVIEW: 'bg-info/10 text-blue-400 border border-info/30',
   RESOLVED: 'bg-success/10 text-emerald-400 border border-success/30',
   ESCALATED: 'bg-danger/10 text-red-400 border border-danger/30',
   CLOSED: 'bg-surface-muted text-ink-muted border border-surface-border',
